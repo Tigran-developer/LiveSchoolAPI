@@ -1,0 +1,83 @@
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+*.log
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio folders
+.vs/
+.vscode/
+.idea/
+
+# IIS / ASP.NET
+*.vspscc
+*.vssscc
+*.dbmdl
+*.pdb
+*.cache
+*.config.user
+*.local.json
+*.publish.xml
+*.psess
+*.vsp
+*.tlog
+
+# Rider project files
+.idea/
+*.sln.iml
+
+# Resharper files
+_ReSharper*/
+*.DotSettings.user
+
+# NuGet packages
+*.nupkg
+packages/
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Compiled DLLs & others
+*.dll
+*.exe
+*.app
+*.so
+*.dylib
+
+# Database files
+*.mdf
+*.ldf
+
+# Temporary & backup files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.sln.docstates
+~$*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Environment & Secrets
+.env
+.env.*
+appsettings.*.json
+secrets.json
+
+# Optional for GitHub Copilot users
+*.copilot
+
+# JetBrains Rider and Rider-related
+.idea/
