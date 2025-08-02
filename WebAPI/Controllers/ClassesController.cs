@@ -36,7 +36,7 @@ namespace WebAPI.Controllers
                     Title = c.Title,
                     Description = c.Description,
                     StartTime = c.StartTime,
-                    EndTime = c.EndTime,
+                    durationInMinutes = c.durationInMinutes,
                     IsRecurring = c.IsRecurring,
                     RecurrencePattern = c.RecurrencePattern,
                     ZoomLink = c.ZoomLink,
@@ -90,7 +90,7 @@ namespace WebAPI.Controllers
                 Description = dto.Description,
                 TeacherId = dto.TeacherId,
                 StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
+                durationInMinutes = dto.durationInMinutes,
                 IsRecurring = dto.IsRecurring,
                 RecurrencePattern = dto.RecurrencePattern,
                 ZoomLink = dto.ZoomLink,
@@ -124,7 +124,7 @@ namespace WebAPI.Controllers
             classEntity.Description = dto.Description;
             classEntity.TeacherId = dto.TeacherId;
             classEntity.StartTime = dto.StartTime;
-            classEntity.EndTime = dto.EndTime;
+            classEntity.durationInMinutes = dto.durationInMinutes;
             classEntity.IsRecurring = dto.IsRecurring;
             classEntity.RecurrencePattern = dto.RecurrencePattern;
             classEntity.ZoomLink = dto.ZoomLink;

@@ -13,7 +13,7 @@ namespace WebAPI.Models.Entities
         [MaxLength(1000)]
         public string? Description { get; set; }
         public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public int durationInMinutes { get; set; }
 
         public bool IsRecurring { get; set; }
 
@@ -25,6 +25,8 @@ namespace WebAPI.Models.Entities
         public string? ZoomLink { get; set; }
 
         public int? MaxParticipants { get; set; }
+
+        public int? ParticipantsCount { get; set; }
 
         [Required]
         public Guid CreatedBy { get; set; }
