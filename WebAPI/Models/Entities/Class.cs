@@ -33,12 +33,14 @@ namespace WebAPI.Models.Entities
 
         public DateTime CreatedAt { get; set; }
 
-        [Required, MaxLength(50)]
-        public string Status { get; set; }
-
         public int NotifyBeforeMinutes { get; set; }
 
         public bool IsDeleted { get; set; }
+
+        [ForeignKey(nameof(Status))]
+        public Guid StatusId { get; set; }
+
+        public LessonStatus Status { get; set; } = default!;
 
         [Required]
         public Guid TeacherId { get; set; }

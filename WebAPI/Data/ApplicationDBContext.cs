@@ -78,8 +78,6 @@ namespace WebAPI.Data
                     .OnDelete(DeleteBehavior.Restrict);
 
                 b.HasIndex(cp => new { cp.ClassId, cp.PupilId }).IsUnique();
-
-                b.Property(cp => cp.Status).HasMaxLength(20);
             });
 
             builder.ApplyConfiguration(new RoleConfiguration());
@@ -89,5 +87,6 @@ namespace WebAPI.Data
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<ClassPupil> ClassPupils { get; set; }
+        public DbSet<LessonStatus> LessonStatuses { get; set; }
     }
 }

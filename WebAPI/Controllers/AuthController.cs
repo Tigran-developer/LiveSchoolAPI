@@ -125,6 +125,7 @@ namespace WebAPI.Controllers
                 Phone = user.Phone,
                 isTeacher = user.isTeacher != true ? false : true,
             };
+
             var cookieValue = System.Text.Json.JsonSerializer.Serialize(userData);
 
             Response.Cookies.Append("currentUser", cookieValue, new CookieOptions
@@ -134,6 +135,7 @@ namespace WebAPI.Controllers
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
+            userData.Id = user.Id;
 
             return Ok(userData);
         }

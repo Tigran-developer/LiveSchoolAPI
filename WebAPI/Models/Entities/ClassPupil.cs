@@ -20,9 +20,6 @@ namespace WebAPI.Models.Entities
 
         public bool? IsApproved { get; set; }
 
-        [MaxLength(20)]
-        public string? Status { get; set; }
-
         [ForeignKey(nameof(PupilId))]
         public Pupil? Pupil { get; set; }
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPI.Data;
 
@@ -11,9 +12,11 @@ using WebAPI.Data;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250815101928_RemoveUserNavigationFromPupil")]
+    partial class RemoveUserNavigationFromPupil
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,8 +202,10 @@ namespace WebAPI.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("StatusId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -220,8 +225,6 @@ namespace WebAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
-
-                    b.HasIndex("StatusId");
 
                     b.HasIndex("TeacherId");
 
@@ -246,6 +249,10 @@ namespace WebAPI.Migrations
                     b.Property<Guid>("PupilId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Status")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PupilId");
@@ -254,22 +261,6 @@ namespace WebAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("ClassPupils", (string)null);
-                });
-
-            modelBuilder.Entity("WebAPI.Models.Entities.LessonStatus", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LessonStatuses");
                 });
 
             modelBuilder.Entity("WebAPI.Models.Entities.Pupil", b =>
@@ -548,12 +539,6 @@ namespace WebAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WebAPI.Models.Entities.LessonStatus", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("WebAPI.Models.Entities.Teacher", "Teacher")
                         .WithMany()
                         .HasForeignKey("TeacherId")
@@ -561,8 +546,6 @@ namespace WebAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Admin");
-
-                    b.Navigation("Status");
 
                     b.Navigation("Teacher");
                 });

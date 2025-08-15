@@ -23,15 +23,25 @@ namespace WebAPI.Controllers
         }
 
 
-        [HttpGet]
-        [Route("{id:guid}")]
-        public IActionResult GetPupil(Guid id)
+        [HttpGet("student")]
+        public IActionResult GetPupil([FromQuery] Guid userId)
         {
-            var pupil = _dBContext.Pupils.Find(id);
-            if(pupil is null)
+            var pupil = _dBContext.Pupils.FirstOrDefault(p => p.UserId == userId.ToString());
+
+            if (pupil == null)
             {
                 return NotFound("There isn't any pupil with this id");
             }
+            pupil = new Pupil
+            {
+                Id = pupil.Id,
+                FirstName = pupil.FirstName,
+                LastName = pupil.LastName,
+                Email = pupil.Email,
+                Phone = pupil.Phone,
+                UserId = pupil.UserId
+            };
+
             return Ok(pupil);
         }
 

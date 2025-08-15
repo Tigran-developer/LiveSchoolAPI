@@ -42,7 +42,11 @@ namespace WebAPI.Controllers
                     ZoomLink = c.ZoomLink,
                     MaxParticipants = c.MaxParticipants,
                     CreatedAt = c.CreatedAt,
-                    Status = c.Status,
+                    Status = c.Status == null ? null : new LessonStatusDTO
+                    {
+                        Id = c.Status.Id,
+                        Name = c.Status.Name
+                    },
                     NotifyBeforeMinutes = c.NotifyBeforeMinutes,
                     IsDeleted = c.IsDeleted,
                     Teacher = c.Teacher == null ? null : new SimplePrivateUserDTO
@@ -60,6 +64,18 @@ namespace WebAPI.Controllers
 
             return Ok(classes);
         }
+
+        [HttpGet("booked_classes")]
+        public async Task<IActionResult> GetClassesForPupilAsync([FromQuery] Guid studentId)
+        {
+           var classes = await _dBContext.Classes
+                .Where(c => !c.IsDeleted &&
+                            _dBContext.ClassPupils.Any(cp => cp.ClassId == c.Id && cp.PupilId == studentId))
+                .ToListAsync();
+
+            return Ok(classes);
+        }
+
 
         [HttpGet("class/{id}")]
         public async Task<IActionResult> GetClassById(int id)
@@ -98,7 +114,7 @@ namespace WebAPI.Controllers
                 CreatedBy = dto.CreatedBy,
                 NotifyBeforeMinutes = dto.NotifyBeforeMinutes ?? 15,
                 CreatedAt = DateTime.UtcNow,
-                Status = "Scheduled",
+                /*StatusId = dto.StatusId,*/
                 IsDeleted = false
             };
 

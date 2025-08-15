@@ -13,9 +13,9 @@
         public int? MaxParticipants { get; set; }
         public int? participantsCount { get; set; }
         public DateTime CreatedAt { get; set; }
-        public string Status { get; set; }
         public int NotifyBeforeMinutes { get; set; }
         public bool IsDeleted { get; set; }
+        public LessonStatusDTO Status { get; set; }
 
         public SimplePrivateUserDTO Teacher { get; set; }
         public SimplePrivateUserDTO Admin { get; set; }

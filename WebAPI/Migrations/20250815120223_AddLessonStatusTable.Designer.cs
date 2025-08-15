@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPI.Data;
 
@@ -11,9 +12,11 @@ using WebAPI.Data;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250815120223_AddLessonStatusTable")]
+    partial class AddLessonStatusTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -246,6 +249,10 @@ namespace WebAPI.Migrations
                     b.Property<Guid>("PupilId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Status")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PupilId");
@@ -269,7 +276,7 @@ namespace WebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LessonStatuses");
+                    b.ToTable("lessonStatuses");
                 });
 
             modelBuilder.Entity("WebAPI.Models.Entities.Pupil", b =>
