@@ -7,6 +7,8 @@
         public required string LastName { get; set; }
         public required string Email { get; set; }
         public string? Phone { get; set; }
-        public bool isTeacher { get; set; }
+        public bool? isAdmin { get; set; }
+        public bool? isStudent { get; set; }
+        public bool? isTeacher { get; set; }
     }
 }

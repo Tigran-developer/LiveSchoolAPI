@@ -20,6 +20,8 @@ namespace WebAPI.Models
         public string ConfirmPassword { get; set; }
 
         public string? Phone { get; set; }
+        public bool? IsAdmin { get; set; }
+        public bool? IsStudent { get; set; }
         public bool? IsTeacher { get; set; }
         public string? Initials { get; set; }
         public string? ClientUrl { get; set; }

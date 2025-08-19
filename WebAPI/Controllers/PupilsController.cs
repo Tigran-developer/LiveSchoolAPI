@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
 
             if (pupil == null)
             {
-                return NotFound("There isn't any pupil with this id");
+                return NotFound("There isn't any student with this id");
             }
             pupil = new Pupil
             {
@@ -50,7 +50,7 @@ namespace WebAPI.Controllers
         {
             if (pupil == null)
             {
-                return BadRequest("Pupil cannot be null");
+                return BadRequest("Student cannot be null");
             }
             var newPupil = new Pupil
             {

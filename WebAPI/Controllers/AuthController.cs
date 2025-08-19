@@ -34,6 +34,8 @@ namespace WebAPI.Controllers
                 LastName = request.LastName,
                 Phone = request.Phone,
                 isTeacher = request.IsTeacher,
+                isAdmin = request.IsAdmin,
+                isStudent = request.IsStudent,
                 Initials = request.Initials               
             };
 
@@ -123,16 +125,18 @@ namespace WebAPI.Controllers
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Phone = user.Phone,
-                isTeacher = user.isTeacher != true ? false : true,
+                isTeacher = user.isTeacher,
+                isAdmin = user.isAdmin,
+                isStudent = user.isStudent,
             };
 
             var cookieValue = System.Text.Json.JsonSerializer.Serialize(userData);
 
             Response.Cookies.Append("currentUser", cookieValue, new CookieOptions
             {
-                HttpOnly = false,
+                HttpOnly = true,
                 Secure = false,
-                SameSite = SameSiteMode.None,
+                SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
             userData.Id = user.Id;
