@@ -7,6 +7,7 @@ using WebAPI.Data;
 using WebAPI.Models;
 using WebAPI.Models.Entities;
 using WebAPI.Services;
+using WebAPI.Attributes;
 
 namespace WebAPI.Controllers
 {
@@ -25,7 +26,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("browse_classes")]
-
+        [Permission("Classes", "Read")]
         public async Task<IActionResult> GetAvailableClasses([FromQuery] Guid userId)
         {
             var student = await _dBContext.Pupils.FirstOrDefaultAsync(t => t.UserId == userId.ToString());
@@ -36,25 +37,40 @@ namespace WebAPI.Controllers
                     .Any(cp => cp.ClassId == c.Id && cp.PupilId == student.Id))
                 .Include(c => c.Teacher)
                 .Include(c => c.Admin)
-                .Select(c => new ClassDto
+                .Include(c => c.Difficulty)
+                .Include(c => c.Status)
+                .Select(c => new ClassDTO
                 {
                     Id = c.Id,
                     Title = c.Title,
                     Description = c.Description,
+                    Subject = c.Subject,
                     StartTime = c.StartTime,
-                    durationInMinutes = c.durationInMinutes,
+                    EndTime = c.EndTime,
+                    DurationInMinutes = c.DurationInMinutes,
                     IsRecurring = c.IsRecurring,
                     RecurrencePattern = c.RecurrencePattern,
                     ZoomLink = c.ZoomLink,
                     MaxParticipants = c.MaxParticipants,
+                    ParticipantsCount = c.ParticipantsCount,
                     CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt,
+                    NotifyBeforeMinutes = c.NotifyBeforeMinutes,
+                    IsDeleted = c.IsDeleted,
+                    Price = c.Price,
+                    DifficultyId = c.DifficultyId,
+                    DifficultyName = c.Difficulty.Name,
+                    Tags = c.Tags,
+                    Materials = c.Materials,
+                    Notes = c.Notes,
+                    Location = c.Location,
+                    IsOnline = c.IsOnline,
+                    RecordingUrl = c.RecordingUrl,
                     Status = c.Status == null ? null : new LessonStatusDTO
                     {
                         Id = c.Status.Id,
                         Name = c.Status.Name
                     },
-                    NotifyBeforeMinutes = c.NotifyBeforeMinutes,
-                    IsDeleted = c.IsDeleted,
                     Teacher = c.Teacher == null ? null : new SimplePrivateUserDTO
                     {
                         FirstName = c.Teacher.FirstName,
@@ -72,30 +88,48 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("booked_classes")]
+        [Permission("Classes", "Read")]
         public async Task<IActionResult> GetClassesForStudentAsync([FromQuery] Guid studentId)
         {
            var classes = await _dBContext.Classes
                 .Where(c => !c.IsDeleted &&
                             _dBContext.ClassPupils.Any(cp => cp.ClassId == c.Id && cp.PupilId == studentId))
-                .Select(c => new ClassDto
+                .Include(c => c.Teacher)
+                .Include(c => c.Admin)
+                .Include(c => c.Difficulty)
+                .Include(c => c.Status)
+                .Select(c => new ClassDTO
                 {
                     Id = c.Id,
                     Title = c.Title,
                     Description = c.Description,
+                    Subject = c.Subject,
                     StartTime = c.StartTime,
-                    durationInMinutes = c.durationInMinutes,
+                    EndTime = c.EndTime,
+                    DurationInMinutes = c.DurationInMinutes,
                     IsRecurring = c.IsRecurring,
                     RecurrencePattern = c.RecurrencePattern,
                     ZoomLink = c.ZoomLink,
                     MaxParticipants = c.MaxParticipants,
+                    ParticipantsCount = c.ParticipantsCount,
                     CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt,
+                    NotifyBeforeMinutes = c.NotifyBeforeMinutes,
+                    IsDeleted = c.IsDeleted,
+                    Price = c.Price,
+                    DifficultyId = c.DifficultyId,
+                    DifficultyName = c.Difficulty.Name,
+                    Tags = c.Tags,
+                    Materials = c.Materials,
+                    Notes = c.Notes,
+                    Location = c.Location,
+                    IsOnline = c.IsOnline,
+                    RecordingUrl = c.RecordingUrl,
                     Status = c.Status == null ? null : new LessonStatusDTO
                     {
                         Id = c.Status.Id,
                         Name = c.Status.Name
                     },
-                    NotifyBeforeMinutes = c.NotifyBeforeMinutes,
-                    IsDeleted = c.IsDeleted,
                     Teacher = c.Teacher == null ? null : new SimplePrivateUserDTO
                     {
                         FirstName = c.Teacher.FirstName,
@@ -114,6 +148,7 @@ namespace WebAPI.Controllers
 
 
         [HttpGet("class/{id}")]
+        [Permission("Classes", "Read")]
         public async Task<IActionResult> GetClassById(int id)
         {
             var classEntity = await _dBContext.Classes
@@ -126,6 +161,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add_class")]
+        [Permission("Classes", "Write")]
         public async Task<IActionResult> AddClass([FromBody] AddClassDTO dto)
         {
             var teacherExists = await _dBContext.Teachers.AnyAsync(t => t.Id == dto.TeacherId);
@@ -136,13 +172,19 @@ namespace WebAPI.Controllers
             if (!adminExists)
                 return BadRequest($"Admin with ID '{dto.CreatedBy}' not found.");
 
+            var difficultyExists = await _dBContext.ClassDifficulties.AnyAsync(d => d.Id == dto.DifficultyId);
+            if (!difficultyExists)
+                return BadRequest($"Difficulty with ID '{dto.DifficultyId}' not found.");
+
             var newClass = new Class
             {
                 Title = dto.Title,
                 Description = dto.Description,
+                Subject = dto.Subject,
                 TeacherId = dto.TeacherId,
                 StartTime = dto.StartTime,
-                durationInMinutes = dto.durationInMinutes,
+                EndTime = dto.EndTime,
+                DurationInMinutes = dto.DurationInMinutes,
                 IsRecurring = dto.IsRecurring,
                 RecurrencePattern = dto.RecurrencePattern,
                 ZoomLink = dto.ZoomLink,
@@ -150,7 +192,14 @@ namespace WebAPI.Controllers
                 CreatedBy = dto.CreatedBy,
                 NotifyBeforeMinutes = dto.NotifyBeforeMinutes ?? 15,
                 CreatedAt = DateTime.UtcNow,
-                /*StatusId = dto.StatusId,*/
+                UpdatedAt = DateTime.UtcNow,
+                Price = dto.Price,
+                DifficultyId = dto.DifficultyId,
+                Tags = dto.Tags,
+                Materials = dto.Materials,
+                Notes = dto.Notes,
+                Location = dto.Location,
+                IsOnline = dto.IsOnline,
                 IsDeleted = false
             };
 
@@ -165,24 +214,33 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateClass(int id, [FromBody] AddClassDTO dto)
+        [Permission("Classes", "Write")]
+        public async Task<IActionResult> UpdateClass(int id, [FromBody] UpdateClassDto dto)
         {
             var classEntity = await _dBContext.Classes.FindAsync(id);
 
             if (classEntity == null || classEntity.IsDeleted)
                 return NotFound("Class not found");
 
-            classEntity.Title = dto.Title;
-            classEntity.Description = dto.Description;
-            classEntity.TeacherId = dto.TeacherId;
-            classEntity.StartTime = dto.StartTime;
-            classEntity.durationInMinutes = dto.durationInMinutes;
-            classEntity.IsRecurring = dto.IsRecurring;
-            classEntity.RecurrencePattern = dto.RecurrencePattern;
-            classEntity.ZoomLink = dto.ZoomLink;
-            classEntity.MaxParticipants = dto.MaxParticipants;
-            classEntity.NotifyBeforeMinutes = dto.NotifyBeforeMinutes ?? 15;
-            classEntity.CreatedBy = dto.CreatedBy; // Optional, or omit if set automatically
+            if (dto.Title != null) classEntity.Title = dto.Title;
+            if (dto.Description != null) classEntity.Description = dto.Description;
+            if (dto.Subject != null) classEntity.Subject = dto.Subject;
+            if (dto.StartTime.HasValue) classEntity.StartTime = dto.StartTime.Value;
+            if (dto.EndTime.HasValue) classEntity.EndTime = dto.EndTime.Value;
+            if (dto.DurationInMinutes.HasValue) classEntity.DurationInMinutes = dto.DurationInMinutes.Value;
+            if (dto.IsRecurring.HasValue) classEntity.IsRecurring = dto.IsRecurring.Value;
+            if (dto.RecurrencePattern != null) classEntity.RecurrencePattern = dto.RecurrencePattern;
+            if (dto.ZoomLink != null) classEntity.ZoomLink = dto.ZoomLink;
+            if (dto.MaxParticipants.HasValue) classEntity.MaxParticipants = dto.MaxParticipants.Value;
+            if (dto.Price.HasValue) classEntity.Price = dto.Price.Value;
+            if (dto.DifficultyId.HasValue) classEntity.DifficultyId = dto.DifficultyId.Value;
+            if (dto.Tags != null) classEntity.Tags = dto.Tags;
+            if (dto.Materials != null) classEntity.Materials = dto.Materials;
+            if (dto.Notes != null) classEntity.Notes = dto.Notes;
+            if (dto.Location != null) classEntity.Location = dto.Location;
+            if (dto.IsOnline.HasValue) classEntity.IsOnline = dto.IsOnline.Value;
+
+            classEntity.UpdatedAt = DateTime.UtcNow;
 
             await _dBContext.SaveChangesAsync();
 
@@ -190,6 +248,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Permission("Classes", "Delete")]
         public async Task<IActionResult> DeleteClass(int id)
         {
             var classEntity = await _dBContext.Classes.FindAsync(id);
@@ -204,6 +263,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("book_class")]
+        [Permission("Classes", "Write")]
         public async Task<ActionResult> BookClassForStudent([FromBody] BookClassDto dto)
         {
             var classExist = await _dBContext.Classes.AnyAsync(t => t.Id == dto.ClassId);

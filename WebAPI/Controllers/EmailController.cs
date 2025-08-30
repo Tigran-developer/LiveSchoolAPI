@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebAPI.Models;
 using WebAPI.Services;
+using WebAPI.Attributes;
 
 namespace WebAPI.Controllers;
 
@@ -17,6 +18,7 @@ public class EmailController : Controller
     }
 
     [HttpGet("singleemail")]
+    [RequireRole("Admin")]
     public async Task<IActionResult> sendSingleEmail()
     {
         EmailMetadata emailMetadata = new EmailMetadata("tigransargsyan998@gmail.com",

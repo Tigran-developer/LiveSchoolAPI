@@ -2,6 +2,7 @@
 using WebAPI.Data;
 using WebAPI.Models;
 using WebAPI.Models.Entities;
+using WebAPI.Attributes;
 
 namespace WebAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
+        [Permission("Pupils", "Read")]
         public IActionResult GetPupils()
         {
             var allPupils = _dBContext.Pupils.ToList();
@@ -24,6 +26,7 @@ namespace WebAPI.Controllers
 
 
         [HttpGet("student")]
+        [Permission("Pupils", "Read")]
         public IActionResult GetPupil([FromQuery] Guid userId)
         {
             var pupil = _dBContext.Pupils.FirstOrDefault(p => p.UserId == userId.ToString());
@@ -46,6 +49,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
+        [Permission("Pupils", "Write")]
         public IActionResult AddPupil(AddPupilDto pupil)
         {
             if (pupil == null)
@@ -66,6 +70,7 @@ namespace WebAPI.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
+        [Permission("Pupils", "Write")]
         public IActionResult UpdatePupil(Guid id, UpdatePupilDto pupil)
         {
             var dbPupil = _dBContext.Pupils.Find(id);
@@ -86,6 +91,7 @@ namespace WebAPI.Controllers
 
         [HttpDelete]
         [Route("{id:guid}")]
+        [Permission("Pupils", "Delete")]
         public IActionResult DeletePupil(Guid id)
         {
             var pupil = _dBContext.Pupils.Find(id);

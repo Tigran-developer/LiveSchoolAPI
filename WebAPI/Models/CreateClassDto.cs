@@ -1,36 +1,63 @@
-﻿using WebAPI.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI.Models
 {
-    public class ClassDTO
+    public class CreateClassDto
     {
-        public Guid Id { get; set; }
+        [Required]
+        [MaxLength(200)]
         public string Title { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(1000)]
         public string Description { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(100)]
         public string Subject { get; set; } = string.Empty;
+
+        [Required]
         public DateTime StartTime { get; set; }
+
+        [Required]
         public DateTime EndTime { get; set; }
+
+        [Required]
+        [Range(15, 480)]
         public int DurationInMinutes { get; set; }
-        public bool IsRecurring { get; set; }
+
+        public bool IsRecurring { get; set; } = false;
+
         public string? RecurrencePattern { get; set; }
+
+        [MaxLength(500)]
         public string? ZoomLink { get; set; }
+
+        [Required]
+        [Range(1, 100)]
         public int MaxParticipants { get; set; }
-        public int? ParticipantsCount { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public int NotifyBeforeMinutes { get; set; }
-        public bool IsDeleted { get; set; }
+
+        [Required]
+        public string TeacherId { get; set; } = string.Empty;
+
+        [Required]
+        [Range(0, 1000)]
         public decimal Price { get; set; }
+
+        [Required]
+        [Range(1, 4)]
         public int DifficultyId { get; set; }
-        public string DifficultyName { get; set; } = string.Empty;
+
         public string[]? Tags { get; set; }
+
         public string[]? Materials { get; set; }
+
+        [MaxLength(1000)]
         public string? Notes { get; set; }
+
+        [MaxLength(200)]
         public string? Location { get; set; }
-        public bool IsOnline { get; set; }
-        public string? RecordingUrl { get; set; }
-        public LessonStatusDTO? Status { get; set; }
-        public SimplePrivateUserDTO? Teacher { get; set; }
-        public SimplePrivateUserDTO? Admin { get; set; }
+
+        public bool IsOnline { get; set; } = true;
     }
 }

@@ -80,7 +80,21 @@ namespace WebAPI.Data
                 b.HasIndex(cp => new { cp.ClassId, cp.PupilId }).IsUnique();
             });
 
+            builder.Entity<ClassDifficulty>(b =>
+            {
+                b.ToTable("ClassDifficulties");
+                b.Property(cd => cd.Name).HasMaxLength(50);
+            });
+
+            builder.Entity<ClassStatus>(b =>
+            {
+                b.ToTable("ClassStatuses");
+                b.Property(cs => cs.Name).HasMaxLength(50);
+            });
+
             builder.ApplyConfiguration(new RoleConfiguration());
+            builder.ApplyConfiguration(new ClassDifficultyConfiguration());
+            builder.ApplyConfiguration(new ClassStatusConfiguration());
         }
         public DbSet<Pupil> Pupils { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
@@ -88,5 +102,7 @@ namespace WebAPI.Data
         public DbSet<Class> Classes { get; set; }
         public DbSet<ClassPupil> ClassPupils { get; set; }
         public DbSet<LessonStatus> LessonStatuses { get; set; }
+        public DbSet<ClassDifficulty> ClassDifficulties { get; set; }
+        public DbSet<ClassStatus> ClassStatuses { get; set; }
     }
 }

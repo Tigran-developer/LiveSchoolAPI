@@ -6,6 +6,7 @@ using WebAPI.Data;
 using WebAPI.Models;
 using WebAPI.Models.Entities;
 using WebAPI.Services;
+using WebAPI.Attributes;
 
 namespace WebAPI.Controllers
 {
@@ -208,6 +209,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("check-email-exist")]
+        [RequireRole("Admin", "Teacher")]
         public async Task<IActionResult> CheckEmailExist([FromQuery] string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
