@@ -18,6 +18,9 @@ namespace WebAPI.Attributes
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
+            if (context == null)
+                return;
+
             var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
             var user = await userManager.GetUserAsync(context.HttpContext.User);
 
@@ -29,7 +32,7 @@ namespace WebAPI.Attributes
 
             var userRoles = await userManager.GetRolesAsync(user);
             
-            if (!_requiredRoles.Any(role => userRoles.Contains(role)))
+            if (userRoles == null || !_requiredRoles.Any(role => userRoles.Contains(role)))
             {
                 context.Result = new ForbidResult();
                 return;

@@ -2,13 +2,13 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WebAPI.Models.Entities;
 
-namespace WebAPI.SeedConfiguration;
-public class RoleConfiguration : IEntityTypeConfiguration<Role>
+namespace WebAPI.SeedConfiguration
 {
-    public void Configure(EntityTypeBuilder<Role> builder)
+    public class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
-        builder.HasData
-            (
+        public void Configure(EntityTypeBuilder<Role> builder)
+        {
+            builder.HasData(
                 new Role
                 {
                     Id = "1",
@@ -31,5 +31,6 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
                     Description = "Pupil role with limited access"
                 }
             );
+        }
     }
 }

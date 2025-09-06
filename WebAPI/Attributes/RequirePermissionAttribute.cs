@@ -10,20 +10,17 @@ namespace WebAPI.Attributes
     public class RequirePermissionAttribute : AuthorizeAttribute, IAsyncAuthorizationFilter
     {
         private readonly string[] _allowedRoles;
-        private readonly bool _requireAdmin;
-        private readonly bool _requireTeacher;
-        private readonly bool _requireStudent;
 
-        public RequirePermissionAttribute(string[] allowedRoles = null, bool requireAdmin = false, bool requireTeacher = false, bool requireStudent = false)
+        public RequirePermissionAttribute(string[] allowedRoles = null)
         {
             _allowedRoles = allowedRoles ?? new string[0];
-            _requireAdmin = requireAdmin;
-            _requireTeacher = requireTeacher;
-            _requireStudent = requireStudent;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
+            if (context == null)
+                return;
+
             var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
             var user = await userManager.GetUserAsync(context.HttpContext.User);
 
@@ -37,30 +34,11 @@ namespace WebAPI.Attributes
             if (_allowedRoles.Length > 0)
             {
                 var userRoles = await userManager.GetRolesAsync(user);
-                if (!_allowedRoles.Any(role => userRoles.Contains(role)))
+                if (userRoles == null || !_allowedRoles.Any(role => userRoles.Contains(role)))
                 {
                     context.Result = new ForbidResult();
                     return;
                 }
-            }
-
-            // Check property-based permissions
-            if (_requireAdmin && user.isAdmin != true)
-            {
-                context.Result = new ForbidResult();
-                return;
-            }
-
-            if (_requireTeacher && user.isTeacher != true)
-            {
-                context.Result = new ForbidResult();
-                return;
-            }
-
-            if (_requireStudent && user.isStudent != true)
-            {
-                context.Result = new ForbidResult();
-                return;
             }
         }
     }

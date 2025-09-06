@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Attributes;
 using WebAPI.Constants;
+using Microsoft.AspNetCore.Identity;
+using WebAPI.Models.Entities;
 
 namespace WebAPI.Controllers
 {
@@ -29,17 +31,17 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("admin-property")]
-        [RequirePermission(requireAdmin: true)]
+        [RequirePermission(new[] { "Admin" })]
         public IActionResult AdminProperty()
         {
-            return Ok("This endpoint requires isAdmin = true");
+            return Ok("This endpoint requires Admin role");
         }
 
         [HttpGet("teacher-property")]
-        [RequirePermission(requireTeacher: true)]
+        [RequirePermission(new[] { "Teacher" })]
         public IActionResult TeacherProperty()
         {
-            return Ok("This endpoint requires isTeacher = true");
+            return Ok("This endpoint requires Teacher role");
         }
 
         [HttpGet("classes-read")]
@@ -71,13 +73,10 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("complex-permission")]
-        [RequirePermission(
-            allowedRoles: new[] { "Admin", "Teacher" }, 
-            requireTeacher: true
-        )]
+        [RequirePermission(new[] { "Admin", "Teacher" })]
         public IActionResult ComplexPermission()
         {
-            return Ok("This endpoint requires Admin role OR Teacher role with isTeacher = true");
+            return Ok("This endpoint requires Admin role OR Teacher role");
         }
 
         [HttpGet("user-info")]
@@ -94,6 +93,78 @@ namespace WebAPI.Controllers
             }
             
             return Ok(new { IsAuthenticated = false });
+        }
+
+        [HttpGet("debug-permission")]
+        public async Task<IActionResult> DebugPermission([FromQuery] string resource = "Classes", [FromQuery] string action = "Read")
+        {
+            var userManager = HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
+            var user = await userManager.GetUserAsync(User);
+            
+            if (user == null)
+            {
+                return Ok(new
+                {
+                    IsAuthenticated = false,
+                    Message = "User not authenticated",
+                    Resource = resource,
+                    Action = action
+                });
+            }
+
+            var userRoles = await userManager.GetRolesAsync(user);
+            
+            // Test the permission logic manually
+            bool hasPermission = false;
+            string permissionResult = "";
+            
+            if (userRoles.Contains("Admin"))
+            {
+                hasPermission = true;
+                permissionResult = "Admin has full access";
+            }
+            else if (resource == "Classes")
+            {
+                if (userRoles.Contains("Teacher"))
+                {
+                    hasPermission = action == "Read" || action == "Write";
+                    permissionResult = $"Teacher access: {hasPermission} for action: {action}";
+                }
+                else if (userRoles.Contains("Pupil"))
+                {
+                    hasPermission = action == "Read";
+                    permissionResult = $"Pupil access: {hasPermission} for action: {action}";
+                }
+                else
+                {
+                    permissionResult = "No matching role found";
+                }
+            }
+
+            return Ok(new
+            {
+                IsAuthenticated = true,
+                User = new
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                },
+                Roles = userRoles,
+                Resource = resource,
+                Action = action,
+                HasPermission = hasPermission,
+                PermissionResult = permissionResult,
+                DebugInfo = new
+                {
+                    IsAdmin = userRoles.Contains("Admin"),
+                    IsTeacher = userRoles.Contains("Teacher"),
+                    IsPupil = userRoles.Contains("Pupil"),
+                    RequestedResource = resource,
+                    RequestedAction = action
+                }
+            });
         }
     }
 }

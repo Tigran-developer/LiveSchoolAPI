@@ -3,12 +3,10 @@
     public class ResponseUserDTO
     {
         public string? Id { get; set; }
-        public required string FirstName { get; set; }
-        public required string LastName { get; set; }
-        public required string Email { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string? Phone { get; set; }
-        public bool? isAdmin { get; set; }
-        public bool? isStudent { get; set; }
-        public bool? isTeacher { get; set; }
+        public List<string> Roles { get; set; } = new List<string>();
     }
 }

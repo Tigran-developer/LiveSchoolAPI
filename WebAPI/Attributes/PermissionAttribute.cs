@@ -23,6 +23,9 @@ namespace WebAPI.Attributes
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
+            if (context == null)
+                return;
+
             var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
             var user = await userManager.GetUserAsync(context.HttpContext.User);
 
@@ -31,7 +34,7 @@ namespace WebAPI.Attributes
                 context.Result = new UnauthorizedResult();
                 return;
             }
-
+            System.Diagnostics.Debug.WriteLine(context);
             // Get user roles
             var userRoles = await userManager.GetRolesAsync(user);
 
@@ -45,9 +48,21 @@ namespace WebAPI.Attributes
 
         private bool HasPermission(User user, IList<string> userRoles, string resource, string action)
         {
+            Console.WriteLine($"[DEBUG] HasPermission called - User: {user?.Email}, Resource: {resource}, Action: {action}");
+            Console.WriteLine($"[DEBUG] User roles: [{string.Join(", ", userRoles ?? new List<string>())}]");
+            
+            if (user == null || userRoles == null || string.IsNullOrEmpty(resource) || string.IsNullOrEmpty(action))
+            {
+                Console.WriteLine($"[DEBUG] HasPermission - Invalid parameters. User: {user != null}, Roles: {userRoles != null}, Resource: '{resource}', Action: '{action}'");
+                return false;
+            }
+
             // Admin has access to everything
-            if (userRoles.Contains(Permissions.Roles.Admin) || user.isAdmin == true)
+            if (userRoles.Contains(Permissions.Roles.Admin))
+            {
+                Console.WriteLine($"[DEBUG] HasPermission - Admin access granted for {resource}:{action}");
                 return true;
+            }
 
             // Check resource-specific permissions
             switch (resource)
@@ -77,30 +92,40 @@ namespace WebAPI.Attributes
 
         private bool HasClassPermission(User user, IList<string> userRoles, string action)
         {
-            if (userRoles.Contains(Permissions.Roles.Teacher) || user.isTeacher == true)
+            Console.WriteLine($"[DEBUG] HasClassPermission - User: {user?.Email}, Action: {action}");
+            Console.WriteLine($"[DEBUG] HasClassPermission - User roles: [{string.Join(", ", userRoles)}]");
+            
+            // Admin has access to everything (already handled in main HasPermission method)
+            
+            if (userRoles.Contains(Permissions.Roles.Teacher))
             {
+                bool hasAccess = action == Permissions.Levels.Read || action == Permissions.Levels.Write;
+                Console.WriteLine($"[DEBUG] HasClassPermission - Teacher access: {hasAccess} for action: {action}");
                 // Teachers can read and manage classes they teach
-                return action == Permissions.Levels.Read || action == Permissions.Levels.Write;
+                return hasAccess;
             }
 
-            if (userRoles.Contains(Permissions.Roles.Pupil) || user.isStudent == true)
+            if (userRoles.Contains(Permissions.Roles.Pupil))
             {
-                // Pupils can only read classes they're enrolled in
-                return action == Permissions.Levels.Read;
+                bool hasAccess = action == Permissions.Levels.Read;
+                Console.WriteLine($"[DEBUG] HasClassPermission - Pupil access: {hasAccess} for action: {action}");
+                // Pupils can read classes (including their booked classes)
+                return hasAccess;
             }
 
+            Console.WriteLine($"[DEBUG] HasClassPermission - No matching role found, access denied");
             return false;
         }
 
         private bool HasPupilPermission(User user, IList<string> userRoles, string action)
         {
-            if (userRoles.Contains(Permissions.Roles.Teacher) || user.isTeacher == true)
+            if (userRoles.Contains(Permissions.Roles.Teacher))
             {
                 // Teachers can read pupil information
                 return action == Permissions.Levels.Read;
             }
 
-            if (userRoles.Contains(Permissions.Roles.Pupil) || user.isStudent == true)
+            if (userRoles.Contains(Permissions.Roles.Pupil))
             {
                 // Pupils can only read their own information
                 return action == Permissions.Levels.Read;
@@ -111,7 +136,7 @@ namespace WebAPI.Attributes
 
         private bool HasTeacherPermission(User user, IList<string> userRoles, string action)
         {
-            if (userRoles.Contains(Permissions.Roles.Teacher) || user.isTeacher == true)
+            if (userRoles.Contains(Permissions.Roles.Teacher))
             {
                 // Teachers can read other teacher information
                 return action == Permissions.Levels.Read;
@@ -122,13 +147,13 @@ namespace WebAPI.Attributes
 
         private bool HasLessonPermission(User user, IList<string> userRoles, string action)
         {
-            if (userRoles.Contains(Permissions.Roles.Teacher) || user.isTeacher == true)
+            if (userRoles.Contains(Permissions.Roles.Teacher))
             {
                 // Teachers can manage lessons
                 return action == Permissions.Levels.Read || action == Permissions.Levels.Write || action == Permissions.Levels.Delete;
             }
 
-            if (userRoles.Contains(Permissions.Roles.Pupil) || user.isStudent == true)
+            if (userRoles.Contains(Permissions.Roles.Pupil))
             {
                 // Pupils can only read lesson information
                 return action == Permissions.Levels.Read;
@@ -140,13 +165,13 @@ namespace WebAPI.Attributes
         private bool HasUserPermission(User user, IList<string> userRoles, string action)
         {
             // Only admins can manage users
-            return userRoles.Contains(Permissions.Roles.Admin) || user.isAdmin == true;
+            return userRoles.Contains(Permissions.Roles.Admin);
         }
 
         private bool HasSystemPermission(User user, IList<string> userRoles, string action)
         {
             // Only admins have system access
-            return userRoles.Contains(Permissions.Roles.Admin) || user.isAdmin == true;
+            return userRoles.Contains(Permissions.Roles.Admin);
         }
     }
 }

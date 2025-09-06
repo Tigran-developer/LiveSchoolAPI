@@ -1,15 +1,22 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI.Models.Entities
 {
     public class User : IdentityUser
     {
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string FirstName { get; set; } = string.Empty;
+        
+        [Required]
+        [MaxLength(50)]
+        public string LastName { get; set; } = string.Empty;
+        
+        [MaxLength(20)]
         public string? Phone { get; set; }
-        public bool? isAdmin { get; set; }
-        public bool? isStudent { get; set; }
-        public bool? isTeacher { get; set; }
+        
+        [MaxLength(15)]
         public string? Initials { get; set; }
     }
 }

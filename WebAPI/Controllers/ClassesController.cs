@@ -27,9 +27,27 @@ namespace WebAPI.Controllers
 
         [HttpGet("browse_classes")]
         [Permission("Classes", "Read")]
-        public async Task<IActionResult> GetAvailableClasses([FromQuery] Guid userId)
+        public async Task<IActionResult> GetAvailableClasses()
         {
-            var student = await _dBContext.Pupils.FirstOrDefaultAsync(t => t.UserId == userId.ToString());
+            Console.WriteLine($"[DEBUG] browse_classes - User.Identity.IsAuthenticated: {User.Identity?.IsAuthenticated}");
+            Console.WriteLine($"[DEBUG] browse_classes - User.Identity.Name: {User.Identity?.Name}");
+            
+            // Get user data from authentication cookie claims
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var firstName = User.FindFirst("FirstName")?.Value;
+            var lastName = User.FindFirst("LastName")?.Value;
+            
+            Console.WriteLine($"[DEBUG] browse_classes - UserId: {userId}, Email: {userEmail}, Name: {firstName} {lastName}");
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("[DEBUG] browse_classes - UserId not found in claims, returning Unauthorized");
+                return Unauthorized("User not authenticated");
+            }
+
+            // Find the pupil record for this user
+            var student = await _dBContext.Pupils.FirstOrDefaultAsync(t => t.UserId == userId);
             if (student == null) return NotFound("Student not found");
 
             var classes = await _dBContext.Classes
@@ -89,11 +107,33 @@ namespace WebAPI.Controllers
 
         [HttpGet("booked_classes")]
         [Permission("Classes", "Read")]
-        public async Task<IActionResult> GetClassesForStudentAsync([FromQuery] Guid studentId)
+        public async Task<IActionResult> GetClassesForStudentAsync()
         {
-           var classes = await _dBContext.Classes
+            Console.WriteLine($"[DEBUG] booked_classes - User.Identity.IsAuthenticated: {User.Identity?.IsAuthenticated}");
+            Console.WriteLine($"[DEBUG] booked_classes - User.Identity.Name: {User.Identity?.Name}");
+            
+            // Get user data from authentication cookie claims
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var firstName = User.FindFirst("FirstName")?.Value;
+            var lastName = User.FindFirst("LastName")?.Value;
+            
+            Console.WriteLine($"[DEBUG] booked_classes - UserId: {userId}, Email: {userEmail}, Name: {firstName} {lastName}");
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("[DEBUG] booked_classes - UserId not found in claims, returning Unauthorized");
+                return Unauthorized("User not authenticated");
+            }
+
+            // Find the pupil record for this user
+            var pupil = await _dBContext.Pupils.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (pupil == null)
+                return NotFound("Student record not found");
+
+            var classes = await _dBContext.Classes
                 .Where(c => !c.IsDeleted &&
-                            _dBContext.ClassPupils.Any(cp => cp.ClassId == c.Id && cp.PupilId == studentId))
+                            _dBContext.ClassPupils.Any(cp => cp.ClassId == c.Id && cp.PupilId == pupil.Id))
                 .Include(c => c.Teacher)
                 .Include(c => c.Admin)
                 .Include(c => c.Difficulty)
@@ -149,10 +189,10 @@ namespace WebAPI.Controllers
 
         [HttpGet("class/{id}")]
         [Permission("Classes", "Read")]
-        public async Task<IActionResult> GetClassById(int id)
+        public async Task<IActionResult> GetClassById(Guid id)
         {
             var classEntity = await _dBContext.Classes
-                .FirstOrDefaultAsync(c => c.Id.ToString() == id.ToString() && !c.IsDeleted);
+                .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
 
             if (classEntity == null)
                 return NotFound("Class not found");
@@ -266,10 +306,16 @@ namespace WebAPI.Controllers
         [Permission("Classes", "Write")]
         public async Task<ActionResult> BookClassForStudent([FromBody] BookClassDto dto)
         {
-            var classExist = await _dBContext.Classes.AnyAsync(t => t.Id == dto.ClassId);
-            var student = await _dBContext.Pupils.FirstOrDefaultAsync(t => t.UserId == dto.StudentId.ToString());
+            // Get the authenticated user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized("User not authenticated");
 
+            // Find the pupil record for this user
+            var student = await _dBContext.Pupils.FirstOrDefaultAsync(t => t.UserId == user.Id);
             if (student == null) return NotFound("Student not found");
+
+            var classExist = await _dBContext.Classes.AnyAsync(t => t.Id == dto.ClassId);
             if (!classExist) return NotFound("Class not found");
 
             var alreadyBooked = await _dBContext.ClassPupils

@@ -30,8 +30,8 @@ namespace WebAPI.Data
                 b.Property(u => u.NormalizedUserName).HasMaxLength(256);
                 b.Property(u => u.NormalizedEmail).HasMaxLength(256);
                 b.Property(u => u.Initials).HasMaxLength(15);
-                b.Property(u => u.FirstName).HasMaxLength(50);
-                b.Property(u => u.LastName).HasMaxLength(50);
+                b.Property(u => u.FirstName).HasMaxLength(50).IsRequired();
+                b.Property(u => u.LastName).HasMaxLength(50).IsRequired();
                 b.Property(u => u.Phone).HasMaxLength(20);
                 b.HasIndex(u => u.Email).IsUnique();
             });
