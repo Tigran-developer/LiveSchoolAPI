@@ -29,8 +29,6 @@ namespace WebAPI.Controllers
         [Permission("Classes", "Read")]
         public async Task<IActionResult> GetAvailableClasses()
         {
-            Console.WriteLine($"[DEBUG] browse_classes - User.Identity.IsAuthenticated: {User.Identity?.IsAuthenticated}");
-            Console.WriteLine($"[DEBUG] browse_classes - User.Identity.Name: {User.Identity?.Name}");
             
             // Get user data from authentication cookie claims
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -38,11 +36,8 @@ namespace WebAPI.Controllers
             var firstName = User.FindFirst("FirstName")?.Value;
             var lastName = User.FindFirst("LastName")?.Value;
             
-            Console.WriteLine($"[DEBUG] browse_classes - UserId: {userId}, Email: {userEmail}, Name: {firstName} {lastName}");
-            
             if (string.IsNullOrEmpty(userId))
             {
-                Console.WriteLine("[DEBUG] browse_classes - UserId not found in claims, returning Unauthorized");
                 return Unauthorized("User not authenticated");
             }
 
@@ -109,8 +104,6 @@ namespace WebAPI.Controllers
         [Permission("Classes", "Read")]
         public async Task<IActionResult> GetClassesForStudentAsync()
         {
-            Console.WriteLine($"[DEBUG] booked_classes - User.Identity.IsAuthenticated: {User.Identity?.IsAuthenticated}");
-            Console.WriteLine($"[DEBUG] booked_classes - User.Identity.Name: {User.Identity?.Name}");
             
             // Get user data from authentication cookie claims
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -118,11 +111,8 @@ namespace WebAPI.Controllers
             var firstName = User.FindFirst("FirstName")?.Value;
             var lastName = User.FindFirst("LastName")?.Value;
             
-            Console.WriteLine($"[DEBUG] booked_classes - UserId: {userId}, Email: {userEmail}, Name: {firstName} {lastName}");
-            
             if (string.IsNullOrEmpty(userId))
             {
-                Console.WriteLine("[DEBUG] booked_classes - UserId not found in claims, returning Unauthorized");
                 return Unauthorized("User not authenticated");
             }
 
